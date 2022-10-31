@@ -2,8 +2,6 @@
 
 /// DssDeploy.sol
 
-// Copyright (C) 2018-2020 Maker Ecosystem Growth Holdings, INC.
-
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -26,11 +24,11 @@ import {Vat} from "dss/vat.sol";
 import {Jug} from "dss/jug.sol";
 import {Vow} from "dss/vow.sol";
 import {Cat} from "dss/cat.sol";
-import {DaiJoin} from "dss/join.sol";
+import {StblJoin} from "dss/join.sol";
 import {Flapper} from "dss/flap.sol";
 import {Flopper} from "dss/flop.sol";
 import {Flipper} from "dss/flip.sol";
-import {Dai} from "dss/dai.sol";
+import {StableCoin } from "dss/stablecoin.sol";
 import {End} from "dss/end.sol";
 import {ESM} from "esm/ESM.sol";
 import {Pot} from "dss/pot.sol";
@@ -68,17 +66,17 @@ contract CatFab {
     }
 }
 
-contract DaiFab {
-    function newDai(address owner, uint chainId) public returns (Dai dai) {
-        dai = new Dai(chainId);
-        dai.rely(owner);
-        dai.deny(address(this));
+contract StableCoinFab {
+    function newStbl(address owner, uint chainId) public returns (StableCoin stbl) {
+        stbl = new StableCoin(chainId);
+        stbl.rely(owner);
+        stbl.deny(address(this));
     }
 }
 
-contract DaiJoinFab {
-    function newDaiJoin(address vat, address dai) public returns (DaiJoin daiJoin) {
-        daiJoin = new DaiJoin(vat, dai);
+contract StblJoinFab {
+    function newStblJoin(address vat, address stbl) public returns (StblJoin stblJoin) {
+        stblJoin = new StblJoin(vat, stbl);
     }
 }
 
@@ -143,34 +141,34 @@ contract PauseFab {
 }
 
 contract DssDeploy is DSAuth {
-    VatFab     public vatFab;
-    JugFab     public jugFab;
-    VowFab     public vowFab;
-    CatFab     public catFab;
-    DaiFab     public daiFab;
-    DaiJoinFab public daiJoinFab;
-    FlapFab    public flapFab;
-    FlopFab    public flopFab;
-    FlipFab    public flipFab;
-    SpotFab    public spotFab;
-    PotFab     public potFab;
-    EndFab     public endFab;
-    ESMFab     public esmFab;
-    PauseFab   public pauseFab;
+    VatFab          public vatFab;
+    JugFab          public jugFab;
+    VowFab          public vowFab;
+    CatFab          public catFab;
+    StableCoinFab   public stblFab;
+    StblJoinFab     public stblJoinFab;
+    FlapFab         public flapFab;
+    FlopFab         public flopFab;
+    FlipFab         public flipFab;
+    SpotFab         public spotFab;
+    PotFab          public potFab;
+    EndFab          public endFab;
+    ESMFab          public esmFab;
+    PauseFab        public pauseFab;
 
-    Vat     public vat;
-    Jug     public jug;
-    Vow     public vow;
-    Cat     public cat;
-    Dai     public dai;
-    DaiJoin public daiJoin;
-    Flapper public flap;
-    Flopper public flop;
-    Spotter public spotter;
-    Pot     public pot;
-    End     public end;
-    ESM     public esm;
-    DSPause public pause;
+    Vat             public vat;
+    Jug             public jug;
+    Vow             public vow;
+    Cat             public cat;
+    StableCoin      public stbl;
+    StblJoin        public stblJoin;
+    Flapper         public flap;
+    Flopper         public flop;
+    Spotter         public spotter;
+    Pot             public pot;
+    End             public end;
+    ESM             public esm;
+    DSPause         public pause;
 
     mapping(bytes32 => Ilk) public ilks;
 
@@ -188,8 +186,8 @@ contract DssDeploy is DSAuth {
         JugFab jugFab_,
         VowFab vowFab_,
         CatFab catFab_,
-        DaiFab daiFab_,
-        DaiJoinFab daiJoinFab_,
+        StableCoinFab stblFab_,
+        StblJoinFab stblJoinFab_,
         FlapFab flapFab_,
         FlopFab flopFab_,
         FlipFab flipFab_,
@@ -203,8 +201,8 @@ contract DssDeploy is DSAuth {
         jugFab = jugFab_;
         vowFab = vowFab_;
         catFab = catFab_;
-        daiFab = daiFab_;
-        daiJoinFab = daiJoinFab_;
+        stblFab = stblFab_;
+        stblJoinFab = stblJoinFab_;
         flapFab = flapFab_;
         flopFab = flopFab_;
         flipFab = flipFab_;
@@ -228,13 +226,13 @@ contract DssDeploy is DSAuth {
         vat.rely(address(spotter));
     }
 
-    function deployDai(uint256 chainId) public auth {
+    function deployStbl(uint256 chainId) public auth {
         require(address(vat) != address(0), "Missing previous step");
 
         // Deploy
-        dai = daiFab.newDai(address(this), chainId);
-        daiJoin = daiJoinFab.newDaiJoin(address(vat), address(dai));
-        dai.rely(address(daiJoin));
+        stbl = stblFab.newStbl(address(this), chainId);
+        stblJoin = stblJoinFab.newStblJoin(address(vat), address(stbl));
+        stbl.rely(address(stblJoin));
     }
 
     function deployTaxation() public auth {
@@ -308,7 +306,7 @@ contract DssDeploy is DSAuth {
     }
 
     function deployPause(uint delay, address authority) public auth {
-        require(address(dai) != address(0), "Missing previous step");
+        require(address(stbl) != address(0), "Missing previous step");
         require(address(end) != address(0), "Missing previous step");
 
         pause = pauseFab.newPause(delay, address(0), authority);
@@ -354,7 +352,7 @@ contract DssDeploy is DSAuth {
         vow.deny(address(this));
         jug.deny(address(this));
         pot.deny(address(this));
-        dai.deny(address(this));
+        stbl.deny(address(this));
         spotter.deny(address(this));
         flap.deny(address(this));
         flop.deny(address(this));
