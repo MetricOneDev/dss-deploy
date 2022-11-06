@@ -81,7 +81,7 @@ contract DogFab {
 }
 
 contract StableCoinFab {
-    function newStableCoin(address owner, uint chainId) public returns (StableCoin stbl) {
+    function newStbl(address owner, uint chainId) public returns (StableCoin stbl) {
         stbl = new StableCoin(chainId);
         stbl.rely(owner);
         stbl.deny(address(this));
@@ -303,7 +303,7 @@ contract DssDeploy is DSAuth {
         require(address(vat) != address(0), "Missing previous step");
 
         // Deploy
-        stbl = stblFab.newStableCoin(address(this), chainId);
+        stbl = stblFab.newStbl(address(this), chainId);
         stblJoin = stblJoinFab.newStblJoin(address(vat), address(stbl));
         stbl.rely(address(stblJoin));
     }
